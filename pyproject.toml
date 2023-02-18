@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "bgg-plotly"
+version = "0.1.0"
+description = "Board game visualization tool"
+authors = ["Christian Gustad"]
+readme = "README.md"
+packages = [{include = "bgg_plotly"}]
+
+[tool.poetry.dependencies]
+python = "3.10.9"
+dash = "^2.8.1"
+gunicorn = "^20.1.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
