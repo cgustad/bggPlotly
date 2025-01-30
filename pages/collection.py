@@ -1,15 +1,16 @@
 import dash
-from dash import html, callback, Output, Input
+from dash import html, callback, Output, Input, dcc
 from components.collection_sidebar import Sidebar
 from components.table import Table
 import pickle
+from components.collection_sidebar import Filter
 
 dash.register_page(__name__)
 
 layout = html.Div([
     dcc.Loading(id="loading-collection", type="default", fullscreen=True),
     # Stores filtered values
-    dcc.Store(id='filtered-value'),
+    dcc.Store(id='filtered-value',data=None),
     Sidebar,
     Table
 ])
@@ -27,8 +28,6 @@ def on_add(starter):
         boardgames = pickle.load(openfile)
     with (open("assets/expansion.pkl", "rb")) as openfile:
         expansions = pickle.load(openfile)
-    from pprint import pprint
-    pprint(boardgames)
     return boardgames, expansions
 
 # Add dropdown options
@@ -65,7 +64,7 @@ def load_user(boardgames, expansions):
 
 
 # Get filtered value
-@app.callback(Output('filtered-value', 'data'),
+@callback(Output('filtered-value', 'data'),
               Input('boardgames', 'data'),
               Input('expansions', 'data'),
               Input('search', 'value'),
@@ -78,10 +77,30 @@ def load_user(boardgames, expansions):
               Input('mechanics-drop', 'value'),
               Input('category-drop', 'value'),
               Input('lang-checkbox', 'value'),)
-def get_filtered_values(data, search, type_, player_count, game_length, rating, weight, designers, mechanics, category, lang):
-    if data:
-        full_list, opt_list = Filter(data, search, type_, player_count, game_length, rating, weight, designers, mechanics, category, lang)
-        out = {'Full': full_list, 'Opt': opt_list}
+def get_filtered_values(boardgames, expansions, search, type_, player_count, game_length, rating, weight, designers, mechanics, category, lang):
+    if boardgames:
+        full_list, opt_list = Filter(boardgames, search, type_, player_count, game_length, rating, weight, designers, mechanics, category, lang)
+        out = full_list
     else:
         out = {'Full': [], 'Opt': []}
     return(out)
+
+
+# Updatate collection
+@callback(Output('collection-table', 'data'),
+              Input('filtered-value', 'data'))
+def filter_collection(boardgames):
+    columns = ["Title", "Designer(s)", "Year published", "Avrage rating", "Weight", "Playing time"]
+    table_data = []
+    for entry in boardgames:
+        dat = {k:v  for k,v in entry.items() if k in columns}
+        table_data.append(dat)
+
+    return table_data
+
+
+def filter_columns(collection):
+    """ Extract columns to print"""
+
+
+    return extracted
