@@ -23,6 +23,7 @@ Type = dcc.Dropdown(id='type-select',
 
 Player_count = dcc.Slider(
     id='player-count',
+    step=None,
     min=0,
     max=6,
     marks={
@@ -33,13 +34,8 @@ Player_count = dcc.Slider(
         4: '4',
         5: '5',
         6: '6+'},
-    value=0,
-    included=False)
-Playercount_Checkboxes = dcc.Checklist(id='lang-checkbox',
-                                       options=[
-                                           {'label': 'Use voted playercount', 'value': 'LI'},
-                                       ],
-                                       value=[])
+    value=0)
+
 
 Game_length = dcc.RangeSlider(
     id='game-length',
@@ -212,13 +208,13 @@ def opt_rec(game, player_count):
     return(optimal, reccomended)
 
 def voted_player(game, playercount):
-    if player_count in game['Optimal playercount']:
+    if playercount in game['Optimal playercount']:
         return (True)
     else:
         return (False)
 
 def official_player(game, playercount):
-    if player_count in game['Reccomended playercount']:
+    if playercount in game['Reccomended playercount']:
         return (True)
     else:
         return (False)
@@ -241,9 +237,11 @@ def LI_fil(game, LI):
 
 
 def Filter(full_list, search, type_, players, game_length, rating, weight, designers, mechanics, category, checkboxes):
+    out_list = []
+    from pprint import pprint
+    pprint(full_list)
+    pprint(checkboxes)
     # Get list of data
-    out_list = list()
-    opt_list = list()
     min_gamelength = min(game_length)
     max_gamelength = max(game_length)
     min_rating = min(rating)
@@ -265,10 +263,14 @@ def Filter(full_list, search, type_, players, game_length, rating, weight, desig
         sat_mechanics = mechanics_filter(game, mechanics)
         sat_category = category_filter(game, category)
         sat_LI = LI_fil(game, checkboxes)
-        if "Voted" in checkboxes:
-            sat_player = voted_player(game, players)
+        # Playercount filtration
+        if players:
+            if "Voted" in checkboxes:
+                sat_player = voted_player(game, players)
+            else:
+                sat_player = official_player(game, players)
         else:
-            sat_player = official_player(game, players)
+            sat_player = True
         if sat_player and sat_search and sat_designer and sat_mechanics and sat_category and sat_gamelength and sat_rating and sat_weigth and sat_LI and sat_type:
             out_list.append(game)
     return out_list
