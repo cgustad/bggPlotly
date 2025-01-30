@@ -1,7 +1,9 @@
 import dash
 from dash import html, callback, Output, Input, dcc
+import dash_bootstrap_components as dbc
 from components.collection_sidebar import Sidebar
 from components.table import Table
+from components.kpi_cards import generate_cards
 import pickle
 from components.collection_sidebar import Filter
 
@@ -24,7 +26,8 @@ layout = html.Div([
           Input('main-collection', 'value'))
 def render_content(tab):
     if tab == 'collection':
-        return Table
+        collection_layout = [dbc.Row(id="collection-cards"), dbc.Row(Table)]
+        return collection_layout
 
     elif tab == 'expansion':
         return None
@@ -78,7 +81,6 @@ def load_user(boardgames, expansions):
     categories = list(set(categories))
     return(types, designers, mechanics, categories)
 
-
 # Get filtered value
 @callback(Output('filtered-value', 'data'),
               Input('boardgames', 'data'),
@@ -101,6 +103,13 @@ def get_filtered_values(boardgames, expansions, search, type_, player_count, gam
         return None
 
 
+# Fill cards
+@callback(Output('collection-cards', 'children'),
+              Input('filtered-value', 'data'))
+def fill_cards(boardgames):
+    cards = generate_cards(boardgames)
+    return cards
+    
 
 # Updatate collection
 @callback(Output('collection-table', 'data'),

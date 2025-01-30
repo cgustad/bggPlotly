@@ -1,10 +1,12 @@
 from dash import html
 from dash import dash_table, dcc
+import dash_bootstrap_components as dbc
 from CONFIG import CONTENT_STYLE, COLUMNS
 
 
 table = html.Div(
-    [dash_table.DataTable(
+    [
+        dash_table.DataTable(
         data=None,
     id='collection-table',
         columns=[{'id': c, 'name': c} for c in COLUMNS],
@@ -27,6 +29,14 @@ table = html.Div(
             'fontWeight': 'bold'
         },
         sort_mode='multi',)])
-Table = html.Div([
-    table], style=CONTENT_STYLE)
+Table = html.Div(
+    [
+        dbc.Card([
+            dbc.CardBody([
+                html.H4("Collection"),
+                table
+                ])
+            ])
+    ],
+    style=CONTENT_STYLE)
 
