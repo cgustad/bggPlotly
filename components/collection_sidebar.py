@@ -16,8 +16,6 @@ User = html.Div([dcc.Dropdown(id='user-select',
 
 Search = dcc.Input(id='search', value='', type='search', placeholder="Search", size='15')
 
-Expansions = daq.BooleanSwitch(id="my_pb", on=False, color="red")
-
 Type = dcc.Dropdown(id='type-select',
                     options=[],
                     value=[],
@@ -37,6 +35,11 @@ Player_count = dcc.Slider(
         6: '6+'},
     value=0,
     included=False)
+Playercount_Checkboxes = dcc.Checklist(id='lang-checkbox',
+                                       options=[
+                                           {'label': 'Use voted playercount', 'value': 'LI'},
+                                       ],
+                                       value=[])
 
 Game_length = dcc.RangeSlider(
     id='game-length',
@@ -93,19 +96,19 @@ Category = html.Div([html.P(),
                                   value=[],
                                   multi=True)])
 
+Toggle_language = daq.ToggleSwitch(id='toggle-language',value=False, label="Language independence require")
 
-Checkboxes = dcc.Checklist(id='lang-checkbox',
+Checkboxes = dcc.Checklist(id='checkboxes',
                            options=[
                                {'label': 'Language independent', 'value': 'LI'},
+                               {'label': 'Use voted playercount', 'value': 'Voted'}
                            ],
-                           value=[])
+                           value=["Voted"])
 
 Sidebar = html.Div([
     html.Div([
         html.H5('Search'),
         Search,
-        html.H5('Expansions'),
-        Expansions,
         html.H5('Type'),
         Type,
         html.H5('Player count'),
@@ -208,24 +211,36 @@ def opt_rec(game, player_count):
             reccomended = True
     return(optimal, reccomended)
 
+def voted_player(game, playercount):
+    if player_count in game['Optimal playercount']:
+        return (True)
+    else:
+        return (False)
+
+def official_player(game, playercount):
+    if player_count in game['Reccomended playercount']:
+        return (True)
+    else:
+        return (False)
+
 
 def player_count(game, player_count):
     if game['Min players'] <= player_count <= game['Max players']:
-        return(True)
-    else:
         return(False)
+    else:
+        return(True)
 
 
 def LI_fil(game, LI):
     if game['Language dependence'] == 'No necessary in-game text':
         return(True)
-    elif LI == []:
+    elif "LI" not in LI:
         return(True)
     else:
         return(False)
 
 
-def Filter(full_list, search, type_, players, game_length, rating, weight, designers, mechanics, category, LI):
+def Filter(full_list, search, type_, players, game_length, rating, weight, designers, mechanics, category, checkboxes):
     # Get list of data
     out_list = list()
     opt_list = list()
@@ -249,10 +264,11 @@ def Filter(full_list, search, type_, players, game_length, rating, weight, desig
         sat_designer = designer_filter(game, designers)
         sat_mechanics = mechanics_filter(game, mechanics)
         sat_category = category_filter(game, category)
-        sat_LI = LI_fil(game, LI)
-        optimal, recommended = opt_rec(game, players)
+        sat_LI = LI_fil(game, checkboxes)
+        if "Voted" in checkboxes:
+            sat_player = voted_player(game, players)
+        else:
+            sat_player = official_player(game, players)
         if sat_player and sat_search and sat_designer and sat_mechanics and sat_category and sat_gamelength and sat_rating and sat_weigth and sat_LI and sat_type:
             out_list.append(game)
-            if optimal:
-                opt_list.append(game)
-    return(out_list, opt_list)
+    return out_list

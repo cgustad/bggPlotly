@@ -7,6 +7,7 @@ app = Dash(__name__,
             dbc.themes.FLATLY,
             dbc.icons.BOOTSTRAP,
             ],
+           suppress_callback_exceptions=True,
            use_pages=True)
 
 app.layout = html.Div([

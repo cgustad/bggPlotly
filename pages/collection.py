@@ -12,9 +12,22 @@ layout = html.Div([
     # Stores filtered values
     dcc.Store(id='filtered-value',data=None),
     Sidebar,
-    Table
+    dcc.Tabs(id='main-collection', value='collection', children=[
+        dcc.Tab(label='Collection', value='collection'),
+        dcc.Tab(label='Expansions', value='expansion'),
+    ]),
+    html.Div(id='collection-display'),
+
 ])
 
+@callback(Output('collection-display', 'children'),
+          Input('main-collection', 'value'))
+def render_content(tab):
+    if tab == 'collection':
+        return Table
+
+    elif tab == 'expansion':
+        return None
 
 # Load pickle data on startup
 @callback(
@@ -29,6 +42,9 @@ def on_add(starter):
     with (open("assets/expansion.pkl", "rb")) as openfile:
         expansions = pickle.load(openfile)
     return boardgames, expansions
+
+
+
 
 # Add dropdown options
 @callback(
@@ -76,14 +92,14 @@ def load_user(boardgames, expansions):
               Input('designer-drop', 'value'),
               Input('mechanics-drop', 'value'),
               Input('category-drop', 'value'),
-              Input('lang-checkbox', 'value'),)
+              Input('checkboxes', 'value'),)
 def get_filtered_values(boardgames, expansions, search, type_, player_count, game_length, rating, weight, designers, mechanics, category, lang):
     if boardgames:
-        full_list, opt_list = Filter(boardgames, search, type_, player_count, game_length, rating, weight, designers, mechanics, category, lang)
-        out = full_list
+        out = Filter(boardgames, search, type_, player_count, game_length, rating, weight, designers, mechanics, category, lang)
+        return out
     else:
-        out = {'Full': [], 'Opt': []}
-    return(out)
+        return None
+
 
 
 # Updatate collection
